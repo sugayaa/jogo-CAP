@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,40 +32,47 @@ int main(int argc, char** argv)
 	usuario jogador, auxiliar;
 
 	freopen("arquivo.txt","w",stderr);
+    //TODO: talvez abrir todos arquivos agora esteja causando problemas de leitura e escrita
 	escreve = fopen("log.dat","wb");
 	adiciona = fopen("log.dat","ab");
 	consulta = fopen("log.dat","rb");
 
 	data = getenv("QUERY_STRING");
-	seq = strstr(data,"nome=");
 
 	if(data == NULL)
 		printf("<P>Erro! Erro na passagem dos dados \n");
 	else
 	{
+        seq = strstr(data,"nome=");
 		if (seq != NULL)
 		{
 
 
 			//Recortando nome
-			if(strstr(seq,"&")==NULL){				/*~~~~~~~~~~~~~~~~~~~~~~*/			
-				//						//Formatos do data:	//
-				pGuardar= strstr(seq,"nome=");			//nome=umnome		//
-				pGuardar+=5;					//			//
-				//						//nome=umnome&senha=abc	//
-				strcpy(nome,seq+5);				/*~~~~~~~~~~~~~~~~~~~~~~*/
+			if(strstr(seq,"&")==NULL){				
+                /*~~~~~~~~~~~~~~~~~~~~~~*/			
+			    //Formatos do data:	    //
+                //nome=umnome		    //
+                //nome=umnome&senha=abc	//
+                /*~~~~~~~~~~~~~~~~~~~~~~*/
+				seq = strstr(seq,"nome=");			
+				seq+=5;
+                strcpy(nome,seq);				
 
 			}else{				
 				pGuardar = strstr(seq,"&");
-				strncpy(nome,seq+5,pGuardar-(seq+5));//auxnome-> posição &nivel...  (10)-(0+5) = tamanho nome da pessoa
+				strncpy(nome, seq+5, pGuardar - (seq+5));//auxnome-> posição &nivel...  (10)-(0+5) = tamanho nome da pessoa
 			}
 
 
-			while(nome[i]!=0 && nome[i]!=13){ //Diferente de nulo e enter
-				if(nome[i]==43)	
-					nome[i]=32; //O data query vem com os espaços trocados pelo +, aqui estamos destrocando
+			while( isalnum(nome[i]) ){
+                if(nome[i] == 43)	
+					nome[i] = 32; //O data query vem com os espaços trocados pelo +, aqui estamos destrocando
 				i++;
 			}
+            nome[i] = '\0';
+
+            //TODO:CHEQUEI ATE AQUI
 
 			//Escrita do nome antes de inserí-lo na função crip
 			strcpy(senha1,nome);
@@ -375,3 +383,4 @@ void Desafio3(char *nome){
 
 
 }
+
