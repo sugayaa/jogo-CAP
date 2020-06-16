@@ -33,7 +33,6 @@ int main(int argc, char** argv)
 
 	//freopen("arquivo.txt","w",stderr);
     //TODO: talvez abrir todos arquivos agora esteja causando problemas de leitura e escrita
-	//escreve = fopen("log.dat","wb");
 
 	//data = getenv("QUERY_STRING");
     char debug[100] = "nome=Vitor\0";
@@ -141,6 +140,7 @@ int main(int argc, char** argv)
 						//atualizar no arquivo, struct auxiliar está apontando para nome achado
 						auxiliar.nivel=1;
 						nivel++;
+                        escreve = fopen("log.dat","ab");
 						fwrite(&auxiliar,sizeof(usuario),1,escreve);
 						fclose(escreve);
 					}else{ //Caso erre
@@ -155,6 +155,7 @@ int main(int argc, char** argv)
 				Desafio2(jogador.nome);
 				jogador.nivel=2;
 				nivel++;
+                escreve = fopen("log.dat","ab");
 				fwrite(&auxiliar, sizeof(usuario),1,escreve);
 				fclose(escreve);
 			}
@@ -175,6 +176,7 @@ int main(int argc, char** argv)
 						//atualizar no arquivo, struct auxiliar está apontando para nome achado					
 						auxiliar.nivel=3;
 						nivel++;
+                        escreve = fopen("log.dat","ab");
 						fwrite(&auxiliar,sizeof(usuario),1,escreve);
 						fclose(escreve);
 					}
