@@ -31,16 +31,16 @@ int main(int argc, char** argv)
 	FILE *escreve, *consulta, *adiciona;
 	usuario jogador, auxiliar;
 
-	freopen("arquivo.txt","w",stderr);
+	//freopen("arquivo.txt","w",stderr);
     //TODO: talvez abrir todos arquivos agora esteja causando problemas de leitura e escrita
-	escreve = fopen("log.dat","wb");
-	adiciona = fopen("log.dat","ab");
-	consulta = fopen("log.dat","rb");
+	//escreve = fopen("log.dat","wb");
 
-	data = getenv("QUERY_STRING");
+	//data = getenv("QUERY_STRING");
+    char debug[100] = "nome=Vitor\0";
+    data = debug;
 
 	if(data == NULL)
-		printf("<P>Erro! Erro na passagem dos dados \n");
+		printf("<P>Erro! Erro na passagem dos dados\n");
 	else
 	{
         seq = strstr(data,"nome=");
@@ -72,55 +72,64 @@ int main(int argc, char** argv)
 			}
             nome[i] = '\0';
 
-            //TODO:CHEQUEI ATE AQUI
-
 			//Escrita do nome antes de inserí-lo na função crip
 			strcpy(senha1,nome);
 			strcpy(senha2,nome);
+            printf("NOME DO JOGADOR: %s\n", nome);
 
 			/**********************VERIFICA SE  O JOGADOR SE EXISTE NO ARQUIVO******************************************/
+            //TODO: Não sei se está funcionando, testar dpois
+            consulta = fopen("log.dat","rb");
+			while(fread(&auxiliar, sizeof(usuario), 1, consulta) != 0){
+                printf("JOGADOR ENCONTRADO ;)\n");
+                printf("NOME: %s\n", auxiliar.nome);
+                printf("SENHA 1: %s\n", auxiliar.senha1);
+                printf("SENHA 2: %s\n", auxiliar.senha2);
+                printf("NIVEL: %d\n", auxiliar.nivel);
 
-
-			while(fread(&auxiliar,sizeof(usuario),1,consulta)!= 0){
-				if(strcmp(nome,auxiliar.nome)==0){
+				if( strcmp(nome, auxiliar.nome) == 0){
 					achou=1;
 					break; 
 				}
 			}
-
+            fclose(consulta);
 			/************************************************************************************************************/
 
-
-			if(achou==0){
+            printf("ACHOU: %d\n", achou);
+            return 0;
+			if(achou == 0){
 
 				//Escrita do nome na struct
-				strcpy(jogador.nome,nome);
+				strcpy(jogador.nome, nome);
 
 				//f(x)=y
 				crip1(senha1);
-				strcpy(jogador.senha1,senha1);
+				strcpy(jogador.senha1, senha1);
 
 
 				//g(x)=z
 				crip2(senha2);
-				strcpy(jogador.senha2,senha2);
+				strcpy(jogador.senha2, senha2);
 
 				//Nivel 0, já que não foi achado cadastro anterior
 				jogador.nivel = 0;
-				fwrite(&jogador,sizeof(usuario),1,adiciona);
+
+                adiciona = fopen("log.dat","ab");
+				fwrite(&jogador, sizeof(usuario), 1, adiciona);
 				fclose(adiciona);
-			}
-			if(achou==1){	//Caso "achou", a struct auxiliar está com os parâmetros do jogador
-				freopen("arquivo.txt","w",stderr);
+
+			}else if(achou==1){	//Caso "achou", a struct auxiliar está com os parâmetros do jogador
+
+				freopen("arquivo.txt", "w", stderr);
 				strcpy(jogador.nome, auxiliar.nome);
-				strcpy(jogador.senha1,auxiliar.senha1);
-				strcpy(jogador.senha2,auxiliar.senha2);
+				strcpy(jogador.senha1, auxiliar.senha1);
+				strcpy(jogador.senha2, auxiliar.senha2);
 				jogador.nivel = auxiliar.nivel;
 				//Agora todos os parâmetros se encontram em jogador, caso ele tenha jogado antes ou não
+                
 			}
-			nivel=jogador.nivel;
 
-			if(nivel==0){
+			if(jogador.nivel == 0){
 
 
 				//Recebendo senha enviada e verificando se está correta
@@ -141,7 +150,7 @@ int main(int argc, char** argv)
 					Desafio1(jogador.senha1,jogador.nome);
 				}
 			}
-			if(nivel==1){
+			if(jogador.nivel == 1){
 
 				Desafio2(jogador.nome);
 				jogador.nivel=2;
@@ -149,7 +158,7 @@ int main(int argc, char** argv)
 				fwrite(&auxiliar, sizeof(usuario),1,escreve);
 				fclose(escreve);
 			}
-			if(nivel==2){
+			if(jogador.nivel == 2){
 
 				Desafio3(jogador.nome);
 				if(strstr(data,"senha=")!=NULL){
@@ -171,15 +180,13 @@ int main(int argc, char** argv)
 					}
 
 				}
-			//}else{
 			}
 		}else{	
 				printf("<P>Erro! Parametro nao encontrado \n");
-		//	}
 
 		}
-	}//ADICIONEI NA ULTIMA EDICAO
-	return 0;
+	}
+    return 0;
 }
 
 int tamNome(char *ponteiro){
