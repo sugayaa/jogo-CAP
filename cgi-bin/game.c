@@ -35,7 +35,7 @@ int main(int argc, char** argv)
     //TODO: talvez abrir todos arquivos agora esteja causando problemas de leitura e escrita
 
 	//data = getenv("QUERY_STRING");
-    char debug[100] = "nome=Vitor\0";
+    char debug[100] = "nome=Vitor&senha=2\0";
     data = debug;
 
 	if(data == NULL)
@@ -64,7 +64,7 @@ int main(int argc, char** argv)
 			}
 
 
-			while( isalnum(nome[i]) ){
+			while( isgraph(nome[i]) ){
                 if(nome[i] == 43)	
 					nome[i] = 32; //O data query vem com os espaços trocados pelo +, aqui estamos destrocando
 				i++;
@@ -74,18 +74,11 @@ int main(int argc, char** argv)
 			//Escrita do nome antes de inserí-lo na função crip
 			strcpy(senha1,nome);
 			strcpy(senha2,nome);
-            printf("NOME DO JOGADOR: %s\n", nome);
 
 			/**********************VERIFICA SE  O JOGADOR SE EXISTE NO ARQUIVO******************************************/
             //TODO: Não sei se está funcionando, testar dpois
             consulta = fopen("log.dat","rb");
 			while(fread(&auxiliar, sizeof(usuario), 1, consulta) != 0){
-                printf("JOGADOR ENCONTRADO ;)\n");
-                printf("NOME: %s\n", auxiliar.nome);
-                printf("SENHA 1: %s\n", auxiliar.senha1);
-                printf("SENHA 2: %s\n", auxiliar.senha2);
-                printf("NIVEL: %d\n", auxiliar.nivel);
-
 				if( strcmp(nome, auxiliar.nome) == 0){
 					achou=1;
 					break; 
@@ -94,8 +87,6 @@ int main(int argc, char** argv)
             fclose(consulta);
 			/************************************************************************************************************/
 
-            printf("ACHOU: %d\n", achou);
-            return 0;
 			if(achou == 0){
 
 				//Escrita do nome na struct
@@ -128,29 +119,41 @@ int main(int argc, char** argv)
                 
 			}
 
+            printf("IMPRIMINDO JOGADOR\n");
+            printf("name: %s\n", jogador.nome);
+            printf("senha1: %s\n", jogador.senha1);
+            printf("senha2: %s\n", jogador.senha2);
+            printf("nivel: %d\n", jogador.nivel);
+
 			if(jogador.nivel == 0){
-
-
 				//Recebendo senha enviada e verificando se está correta
-				if(strstr(data,"senha=")!=NULL){ //Caso na URL contenha &senha=
-					psenha = strstr(data,"senha=");
-					strcpy(senha,psenha+6);
-
-					if(strcmp(senha,jogador.senha1)==0){//Caso acerta a senha
+				if(strstr(data, "&senha=") != NULL){ //Caso na URL contenha &senha=
+                    printf("Recebi senha na url.\n");
+                    psenha = strstr(data, "&senha=");
+					strcpy(senha, psenha+7);
+                    printf("Senha recebida: %s\n", senha);
+					return 0;
+                    //Caso acerte a senha
+					if(strcmp(senha, jogador.senha1) == 0){
 						//atualizar no arquivo, struct auxiliar está apontando para nome achado
-						auxiliar.nivel=1;
+						auxiliar.nivel = 1;
 						nivel++;
+                        //TODO: Queria trocar só o registro, possível sem fazer cópia inteira do arquivo?
                         escreve = fopen("log.dat","ab");
-						fwrite(&auxiliar,sizeof(usuario),1,escreve);
+						fwrite(&auxiliar, sizeof(usuario), 1, escreve);
 						fclose(escreve);
 					}else{ //Caso erre
 						Desafio1(jogador.senha1,jogador.nome);
 					}
 				}else {
-					Desafio1(jogador.senha1,jogador.nome);
+                    printf("Não recebi senha na url.\n");
+                    return 0;
+					Desafio1(jogador.senha1, jogador.nome);
 				}
 			}
 			if(jogador.nivel == 1){
+                printf("Entrei no nivel 2.\n");
+                return 0;
 
 				Desafio2(jogador.nome);
 				jogador.nivel=2;
@@ -160,6 +163,8 @@ int main(int argc, char** argv)
 				fclose(escreve);
 			}
 			if(jogador.nivel == 2){
+                printf("Entrei no nível 3.\n");
+                return 0;
 
 				Desafio3(jogador.nome);
 				if(strstr(data,"senha=")!=NULL){
