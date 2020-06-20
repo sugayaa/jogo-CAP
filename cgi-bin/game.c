@@ -14,7 +14,7 @@ typedef struct user{
 
 
 int tamNome(char *ponteiro);
-void ferramenta_arquivo(int opcao, usuario a);
+void atualiza_nivel(int pos, int nivel);
 void crip1(char *nome);
 void crip2(char *nome);
 void Desafio1(char *senha,char *nome);
@@ -27,7 +27,7 @@ int main(int argc, char** argv)
 	int nivel;
 	char nome[300],senha[300],senha1[300],senha2[300];
 	char *seq, *pGuardar, *data, *auxnome,*psenha;
-	int valor,i=0, achou=0, j=0;
+	int valor,i=0, achou=0, j=0, pos = 0;
 	FILE *escreve, *consulta, *adiciona;
 	usuario jogador, auxiliar;
 
@@ -35,7 +35,7 @@ int main(int argc, char** argv)
     //TODO: talvez abrir todos arquivos agora esteja causando problemas de leitura e escrita
 
 	//data = getenv("QUERY_STRING");
-    char debug[100] = "nome=Vitor&senha=2\0";
+    char debug[100] = "nome=Vitor&senha=123\0";
     data = debug;
 
 	if(data == NULL)
@@ -45,8 +45,6 @@ int main(int argc, char** argv)
         seq = strstr(data,"nome=");
 		if (seq != NULL)
 		{
-
-
 			//Recortando nome
 			if(strstr(seq,"&")==NULL){				
                 /*~~~~~~~~~~~~~~~~~~~~~~*/			
@@ -76,13 +74,13 @@ int main(int argc, char** argv)
 			strcpy(senha2,nome);
 
 			/**********************VERIFICA SE  O JOGADOR SE EXISTE NO ARQUIVO******************************************/
-            //TODO: Não sei se está funcionando, testar dpois
             consulta = fopen("log.dat","rb");
 			while(fread(&auxiliar, sizeof(usuario), 1, consulta) != 0){
 				if( strcmp(nome, auxiliar.nome) == 0){
 					achou=1;
 					break; 
 				}
+                pos++;
 			}
             fclose(consulta);
 			/************************************************************************************************************/
@@ -108,9 +106,8 @@ int main(int argc, char** argv)
 				fwrite(&jogador, sizeof(usuario), 1, adiciona);
 				fclose(adiciona);
 
-			}else if(achou==1){	//Caso "achou", a struct auxiliar está com os parâmetros do jogador
+			}else if(achou == 1){	//Caso "achou", a struct auxiliar está com os parâmetros do jogador
 
-				freopen("arquivo.txt", "w", stderr);
 				strcpy(jogador.nome, auxiliar.nome);
 				strcpy(jogador.senha1, auxiliar.senha1);
 				strcpy(jogador.senha2, auxiliar.senha2);
@@ -132,18 +129,18 @@ int main(int argc, char** argv)
                     psenha = strstr(data, "&senha=");
 					strcpy(senha, psenha+7);
                     printf("Senha recebida: %s\n", senha);
-					return 0;
                     //Caso acerte a senha
 					if(strcmp(senha, jogador.senha1) == 0){
+                        printf("Acertou a senha.\n");
 						//atualizar no arquivo, struct auxiliar está apontando para nome achado
 						auxiliar.nivel = 1;
 						nivel++;
-                        //TODO: Queria trocar só o registro, possível sem fazer cópia inteira do arquivo?
-                        escreve = fopen("log.dat","ab");
-						fwrite(&auxiliar, sizeof(usuario), 1, escreve);
-						fclose(escreve);
+                        atualiza_nivel(pos, 1);
+                        return 0;
 					}else{ //Caso erre
-						Desafio1(jogador.senha1,jogador.nome);
+                        printf("Errou a senha.\n");
+						//Desafio1(jogador.senha1,jogador.nome);
+                        return 0;
 					}
 				}else {
                     printf("Não recebi senha na url.\n");
@@ -205,31 +202,19 @@ int tamNome(char *ponteiro){
 	return tamanho;
 }
 
-/*
-   void ferramenta_arquivo(int opcao, usuario a){
-   FILE *escreve, *consulta, *adiciona;
-   switch(opcao){
+void atualiza_nivel(int registry_pos, int nivel){
+    FILE *atualiza = fopen("log.dat", "rb+");
+    usuario temp;
+    fseek(atualiza, registry_pos * sizeof( usuario ), SEEK_SET);
+    fread( &temp, sizeof(usuario), 1, atualiza );
 
-   case 1:
-   escreve = fopen("log.dat","wb");
-   fwrite(&a,sizeof(usuario),1,escreve); //Perguntar para o antonio onde esta o ponteiro
-   fclose(escreve);
-   break;
-   case 2:
-   adiciona = fopen("log.dat","ab");
-   fwrite(&a,sizeof(usuario),1,adiciona);
-   fclose(adiciona);
-   break;
-   case 3:
-   consulta = fopen("log.dat","rb");
-   fread(&a,sizeof(usuario),1,consulta);
-   fclose(consulta);
-   break;
+    fseek(atualiza, registry_pos * sizeof( usuario ), SEEK_SET);
+    temp.nivel = nivel;
 
-   }
+    fwrite( &temp, sizeof(usuario), 1, atualiza );
+    fclose(atualiza);
+}
 
-   }
-   */
 /*
  *
  *PRIMEIRA CRIPTO
